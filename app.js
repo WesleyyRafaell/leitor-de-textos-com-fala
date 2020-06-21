@@ -1,4 +1,9 @@
-const main = document.querySelector('main')
+const main = document.querySelector('main');
+const buttonInsertText = document.querySelector(".btn-toggle");
+const divTextBox = document.querySelector(".text-box");
+const closeDivTextBox = document.querySelector(".close");
+const selectElement = document.querySelector("select");
+
 const humanExpressions = [
     {img: './img/drink.jpg', text: 'Estou com sede'},
     {img: './img/food.jpg', text: 'Estou com fome'},
@@ -12,7 +17,26 @@ const humanExpressions = [
     {img: './img/home.jpg', text: 'Quero ir para casa'},
     {img: './img/school.jpg', text: 'Quero ir para a escola'},
     {img: './img/grandma.jpg', text: 'Quero ver a vovó'},
-]
+];
+
+
+const utterance = new SpeechSynthesisUtterance();
+
+
+const setTextMensage = text => {
+    utterance.text = text;
+}
+
+
+const speekText = () => {
+    speechSynthesis.speak(utterance);
+}
+
+const setVoice = event => {
+    const selectedVoice = voices.find(voice => voice.name === event.target.value);
+    utterance.voice = selectedVoice;
+}
+
 
 const createExpressionBox = ({img, text}) => {
     const div = document.createElement('div');
@@ -22,8 +46,43 @@ const createExpressionBox = ({img, text}) => {
         <img src="${img}" alt="${text}">
         <p class="info">${text}</p>
     `;
+
+    div.addEventListener('click', () => {
+        setTextMensage(text);
+        speekText();
+
+
+        div.classList.add('active');
+        setTimeout(() => {
+            div.classList.remove('active');
+        }, 1000)
+    })
     
     main.appendChild(div)
 }
 
 humanExpressions.forEach(createExpressionBox);
+
+let voices = [];
+
+speechSynthesis.addEventListener('voiceschanged', () => {
+    voices = speechSynthesis.getVoices();
+    voices.forEach(({ name, lang }) => {
+        const option = document.createElement('option');
+
+        option.value = name;
+        option.textContent = `${lang} | ${name}`;
+        selectElement.appendChild(option);
+    })
+    
+});
+
+buttonInsertText.addEventListener('click', () => {
+    divTextBox.classList.add('show');
+});
+
+closeDivTextBox.addEventListener('click', () => {
+    divTextBox.classList.remove('show');
+});
+
+selectElement.addEventListener('change', setVoice);
